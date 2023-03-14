@@ -1,0 +1,9 @@
+{
+  "name": "substring",
+  "version": "0.0.0",
+  "description": "Substring",
+  "main": "app.js",
+  "author": {
+    "name": ""
+  }
+}
