@@ -13,7 +13,8 @@ function read(inFile) {
     }
 }
 
-function BruteCheck(str, substr, i, substrLen, array) {
+function CheckMatchBrute(str, substr, i, substrLen, array) {
+    // Проверяет совпадение строк, посимвольным сравнением. 
     let j = 0;
     while (str[i + j] == substr[j]) {
         j++;
@@ -26,27 +27,15 @@ function BruteCheck(str, substr, i, substrLen, array) {
     return array;
 }
 
-function BruteForce(strFile, substrFile) {
-    let str = read(strFile);
-    if (str == undefined || str == "")
-        return undefined;
-    let substr = read(substrFile);
-    if (substr == undefined || substr == "")
-        return undefined;
+function StringSearchBruteForce(str, substr) {
+    // Вычисляет массив индексов вхождений подстроки в строку, используя метод грубой силы.
     let strLen = str.length;
     let substrLen = substr.length;
     let array = [];
 
     const start = new Date().getTime();
     while (i < strLen - substrLen + 1) {
-        j = 0;
-        while (str[i + j] == substr[j]) {
-            j++;
-            if (j == substrLen) {
-                array[array.length] = i;
-                break;
-            }
-        }
+        array = CheckMatchBrute(str, substr, i, substrLen, array)
         i++;
     }
     const end = new Date().getTime();
@@ -55,94 +44,90 @@ function BruteForce(strFile, substrFile) {
     return array;
 }
 
-function MakeHash(str, len, whatHashes) {
+function MakeHash(str, len, hashType) {
     let res = 0;
-    if (whatHashes == "h1") {
+    if (hashType == "h1") {
         for (let i = 0; i < len; i++) {
             res += str.charCodeAt(i);
         }
     }
-    else if (whatHashes == "h2") {
+    else if (hashType == "h2") {
         for (let i = 0; i < len; i++) {
-            res += str.charCodeAt(i) * str.charCodeAt(i);
+            res += str.charCodeAt(i)**2;
         }
     }
-    else if (whatHashes == "h3") {
+    else if (hashType == "h3") {
         for (let i = 0; i < len; i++) {
-            res = res * 2 + str.charCodeAt(i);
+            res = 2 * res + str.charCodeAt(i);
         }
     }
     return res;
 }
 
-function ChangeHash(hashStr, str, substrLen, i, whatHashes) {
-    if (whatHashes == "h1") {
+function UpdateHash(hashStr, str, substrLen, i, hashType) {
+    // Сдвигает скользащее окно хэша на 1 в право.
+    if (hashType == "h1") {
         hashStr += str.charCodeAt(i + substrLen) - str.charCodeAt(i);
     }
-    else if (whatHashes == "h2") {
-        hashStr += str.charCodeAt(i + substrLen) * str.charCodeAt(i + substrLen)
-            - str.charCodeAt(i) * str.charCodeAt(i);
+    else if (hashType == "h2") {
+        hashStr += str.charCodeAt(i + substrLen)**2 - str.charCodeAt(i)**2;
     }
-    else if (whatHashes == "h3") {
-        hashStr = (hashStr - str.charCodeAt(i) * (Math.pow(2, substrLen-1))) * 2
+    else if (hashType == "h3") {
+        hashStr = 2 * (hashStr - str.charCodeAt(i) * (Math.pow(2, substrLen-1)))
             + str.charCodeAt(i + substrLen);
     }
     return hashStr;
 }
 
-function Hashes(strFile, substrFile, collisionFlag, whatHashes) {
-    let str = read(strFile);
-    if (str == undefined || str == "")
-        return undefined;
-    let subStr = read(substrFile);
-    if (subStr == undefined || subStr == "")
-        return undefined;
+function StringSearchWithHashes(str, substr, collisionFlag, hashType) {
+    // Вычисляет массив индексов вхождений подстроки в строку, используя хеширование.
     let strLen = str.length;
-    let substrLen = subStr.length;
+    let substrLen = substr.length;
     let array = [];
     let i = 0;
     let collision = 0;
-    let arrLen = 0;
+    let prevArrLen = 0;
 
     const start = new Date().getTime();
-    let hashStr = MakeHash(str, substrLen, whatHashes);
-    let hashSubStr = MakeHash(subStr, substrLen, whatHashes);
+    let hashStr = MakeHash(str, substrLen, hashType);
+    let hashSubStr = MakeHash(substr, substrLen, hashType);
     while (i < strLen - substrLen + 1) {
         if (hashStr == hashSubStr) {
-            arrLen = array.length;
-            array = BruteCheck(str, subStr, i, substrLen, array);
-            if (arrLen == array.length)
+            prevArrLen = array.length;
+            array = CheckMatchBrute(str, substr, i, substrLen, array);
+            if (prevArrLen == array.length)
                 collision += 1;
-            if (howManyEntriesShow == array.length)
+            if (countOfEntries == array.length)
                 break;
         }
-        hashStr = ChangeHash(hashStr, str, substrLen, i, whatHashes);
+        hashStr = UpdateHash(hashStr, str, substrLen, i, hashType);
         i++;
     }
-    if (hashStr == hashSubStr && howManyEntriesShow != array.length) {
-        arrLen = array.length;
-        array = BruteCheck(str, subStr, i, substrLen, array);
-        if (arrLen == array.length)
+    if (hashStr == hashSubStr && countOfEntries != array.length) {
+        prevArrLen = array.length;
+        array = CheckMatchBrute(str, substr, i, substrLen, array);
+        if (prevArrLen == array.length)
             collision += 1;
     }
     const end = new Date().getTime();
 
-    if (time == true) console.log(`WorkTime ${whatHashes}: ${end - start}ms`);
+    if (time == true) console.log(`WorkTime ${hashType}: ${end - start}ms`);
     if (collisionFlag == true) console.log(`There are ${collision} collisions`);
     return array;
 }
 
 let flagsCount = 0;
-let howManyEntriesShow;
+let countOfEntries;
 let time = false;
 function CheckFlags() {
+    // Обрабатывает опциональные параметры командной строки
     if (arg[2 + flagsCount] == "-c") {
         flagsCount++;
         collisionFlag = true;
         CheckFlags();
     }
     else if (arg[2 + flagsCount] == "-n") {
-        howManyEntriesShow = arg[2 + flagsCount + 1];
+        countOfEntries = arg[2 + flagsCount + 1];
         flagsCount++;
         flagsCount++;
         CheckFlags();
@@ -156,20 +141,26 @@ function CheckFlags() {
 CheckFlags();
 let mode = arg[2 + flagsCount];
 let resArray = [];
-if (mode == "b") {
-    resArray = BruteForce(arg[3 + flagsCount], arg[4 + flagsCount]);
-}
-else if (mode == "h1" || mode == "h2" || mode == "h3") {
-    resArray = Hashes(arg[3 + flagsCount], arg[4 + flagsCount], collisionFlag, mode);
-}
-else
+
+if (mode != "h1" && mode != "h2" && mode != "h3" && mode != "b"){
     console.log("You need to choose mode (b, h1, h2, h3)");
+}
+else {
+    let str = read(arg[3 + flagsCount]);
+    let substr = read(arg[4 + flagsCount]);
+    if (str == undefined || str == "" || substr == undefined || substr == "")
+        resArray = undefined;
+    else
+        resArray = mode == "b" 
+            ? StringSearchBruteForce(str, substr) 
+            : StringSearchWithHashes(str, substr, collisionFlag, mode)
+}
 
 if (resArray == undefined) console.log("One of the files is empty or not exit");
 else {
     console.log("------First n entries-----");
-    if (howManyEntriesShow > resArray.length) howManyEntriesShow = resArray.length;
-    for (let i = 0; i < howManyEntriesShow; i++) {
+    if (countOfEntries > resArray.length) countOfEntries = resArray.length;
+    for (let i = 0; i < countOfEntries; i++) {
         console.log(`|            ${resArray[i]}           |`);
     }
     console.log("--------------------------");
