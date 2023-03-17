@@ -4,7 +4,7 @@
 
 **Пример запуска:**
 
-js-substring_search_hash>node src/hash.js -n 4 -t -c h3 resources/Harry.txt resources/HarrySubStr.txt
+js-substring_search_hash>node src/hash.js -n 18 -t -c h3 resources/Harry.txt resources/HarrySubStr.txt
 
 **-n number**, если установлен, то выводится number ближайших вхождений подстроки\
 **-t**, если установлен, то выводится время работы алгоритма\
@@ -20,12 +20,26 @@ js-substring_search_hash>node src/hash.js -n 4 -t -c h3 resources/Harry.txt reso
 **resources/HarrySubStr.txt** - подстрока "Гарри"
 
 Для примера выше будет выведен результат:\
-WorkTime h3: 0ms\
-There are 1 collisions\
+WorkTime h3: 15ms\
+There are 4 collisions\
 ------First n entries-----\
 |            6652           |\
 |            7338           |\
 |            7438           |\
 |            12939           |\
+|            21924           |\
+|            22106           |\
+|            22513           |\
+|            23366           |\
+|            23883           |\
+|            24276           |\
+|            24387           |\
+|            25249           |\
+|            27604           |\
+|            28161           |\
+|            28447           |\
+|            29810           |\
+|            30091           |\
+|            30752           |\
 --------------------------\
 
